@@ -28,7 +28,7 @@ publishing {
 }
 
 dependencies {
-    implementation("com.github.hcmc-studio:kotlin-protocol-extension:0.0.4-build-02")
+    implementation("com.github.hcmc-studio:kotlin-protocol-extension:0.0.4-release")
 
     implementation("org.jetbrains.kotlinx:kotlinx-datetime-jvm:0.4.0")
 }
