@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "studio.hcmc"
-version = "0.0.4"
+version = "0.0.5"
 
 repositories {
     mavenCentral()
@@ -21,7 +21,7 @@ publishing {
         create<MavenPublication>("maven") {
             groupId = "studio.hcmc"
             artifactId = "spring-controller-extension"
-            version = "0.0.4"
+            version = "0.0.5"
             from(components["java"])
         }
     }
