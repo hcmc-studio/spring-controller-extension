@@ -18,6 +18,10 @@ repositories {
     maven { setUrl("https://jitpack.io") }
 }
 
+java {
+    withSourcesJar()
+}
+
 kotlin {
     jvmToolchain(jdk_version.toInt())
 }
