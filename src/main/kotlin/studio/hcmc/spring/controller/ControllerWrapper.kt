@@ -1,36 +1,80 @@
+@file:Suppress("DuplicatedCode")
+
 package studio.hcmc.spring.controller
 
+import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletResponse
 import kotlinx.datetime.Clock
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import studio.hcmc.kotlin.protocol.io.Response
 
 interface ControllerWrapper {
-    companion object
+    companion object {
+        var defaultJson = Json
+    }
 }
 
-inline fun ControllerWrapper.respondEmpty(block: () -> Unit): Response.Empty {
+inline fun ControllerWrapper.respondEmpty(
+    servletRequest: HttpServletRequest,
+    servletResponse: HttpServletResponse,
+    block: () -> Unit
+) {
     val acceptedAt = Clock.System.now()
-    block()
+    try {
+        block()
 
-    return Response.Empty(acceptedAt)
+        val response = Response.Empty(acceptedAt)
+        val encoded = ControllerWrapper.defaultJson.encodeToString(response)
+        servletResponse.outputStream.write(encoded.toByteArray())
+    } catch (e: Throwable) {
+        val response = Response.Error(acceptedAt, e)
+        val encoded = ControllerWrapper.defaultJson.encodeToString(response)
+        servletResponse.outputStream.write(encoded.toByteArray())
+    }
 }
 
-inline fun <reified T> ControllerWrapper.respondObject(block: () -> T): Response.Object<T> {
+inline fun <reified T : Any> ControllerWrapper.respondObject(
+    servletRequest: HttpServletRequest,
+    servletResponse: HttpServletResponse,
+    block: () -> T
+) {
     val acceptedAt = Clock.System.now()
-    val result = block()
-
-    return Response.Object(acceptedAt, result)
+    try {
+        val response = Response.Object(acceptedAt, block())
+        val encoded = ControllerWrapper.defaultJson.encodeToString(response)
+        servletResponse.outputStream.write(encoded.toByteArray())
+    } catch (e: Throwable) {
+        val response = Response.Error(acceptedAt, e)
+        val encoded = ControllerWrapper.defaultJson.encodeToString(response)
+        servletResponse.outputStream.write(encoded.toByteArray())
+    }
 }
 
-inline fun <reified T> ControllerWrapper.respondArray(block: () -> List<T>): Response.Array<T> {
+inline fun <reified T> ControllerWrapper.respondArray(
+    servletRequest: HttpServletRequest,
+    servletResponse: HttpServletResponse,
+    block: () -> List<T>
+) {
     val acceptedAt = Clock.System.now()
-    val result = block()
-
-    return Response.Array(acceptedAt, result)
+    try {
+        val response = Response.Object(acceptedAt, block())
+        val encoded = ControllerWrapper.defaultJson.encodeToString(response)
+        servletResponse.outputStream.write(encoded.toByteArray())
+    } catch (e: Throwable) {
+        val response = Response.Error(acceptedAt, e)
+        val encoded = ControllerWrapper.defaultJson.encodeToString(response)
+        servletResponse.outputStream.write(encoded.toByteArray())
+    }
 }
 
-inline fun ControllerWrapper.respondError(block: () -> Throwable): Response.Error {
+inline fun ControllerWrapper.respondError(
+    servletRequest: HttpServletRequest,
+    servletResponse: HttpServletResponse,
+    block: () -> Throwable
+) {
     val acceptedAt = Clock.System.now()
-    val result = block()
-
-    return Response.Error(acceptedAt, result)
+    val response = Response.Error(acceptedAt, block())
+    val encoded = ControllerWrapper.defaultJson.encodeToString(response)
+    servletResponse.outputStream.write(encoded.toByteArray())
 }

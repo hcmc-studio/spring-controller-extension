@@ -1,6 +1,7 @@
 val project_version: String by project
 val jdk_version: String by project
 val kotlinx_datetime_version: String by project
+val kotlinx_serialization_version: String by project
 val hcmc_extension_version: String by project
 
 plugins {
@@ -47,4 +48,8 @@ dependencies {
     implementation("com.github.hcmc-studio:kotlin-protocol-extension:$hcmc_extension_version")
 
     implementation("org.jetbrains.kotlinx:kotlinx-datetime-jvm:$kotlinx_datetime_version")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-core-jvm:$kotlinx_serialization_version")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json-jvm:$kotlinx_serialization_version")
+
+    implementation("jakarta.servlet:jakarta.servlet-api:6.0.0")
 }
