@@ -1,8 +1,12 @@
 val project_version: String by project
 val jdk_version: String by project
+val kotlinx_coroutines_version: String by project
 val kotlinx_datetime_version: String by project
 val kotlinx_serialization_version: String by project
 val hcmc_extension_version: String by project
+val jakarta_servlet_api_version: String by project
+val spring_version: String by project
+val tomcat_embed_core_version: String by project
 
 plugins {
     kotlin("jvm")
@@ -45,11 +49,15 @@ publishing {
 }
 
 dependencies {
+    implementation("com.github.hcmc-studio:kotlin-coroutines-extension:$hcmc_extension_version")
     implementation("com.github.hcmc-studio:kotlin-protocol-extension:$hcmc_extension_version")
 
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinx_coroutines_version")
     implementation("org.jetbrains.kotlinx:kotlinx-datetime-jvm:$kotlinx_datetime_version")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-core-jvm:$kotlinx_serialization_version")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json-jvm:$kotlinx_serialization_version")
 
-    implementation("jakarta.servlet:jakarta.servlet-api:6.0.0")
+    implementation("jakarta.servlet:jakarta.servlet-api:$jakarta_servlet_api_version")
+    implementation("org.apache.tomcat.embed:tomcat-embed-core:$tomcat_embed_core_version")
+    implementation("org.springframework:spring-web:$spring_version")
 }

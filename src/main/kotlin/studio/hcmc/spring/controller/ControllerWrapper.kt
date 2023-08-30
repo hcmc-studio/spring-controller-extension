@@ -15,6 +15,22 @@ interface ControllerWrapper {
     }
 }
 
+inline fun ControllerWrapper.block(
+    request: HttpServletRequest,
+    response: HttpServletResponse,
+    block: ControllerContext.() -> Unit
+) {
+    val context = ControllerContext(request, response)
+    try {
+        context.block()
+        if (!context.isFinished) {
+            context.finish()
+        }
+    } catch (e: Throwable) {
+        context.respondError(e)
+    }
+}
+
 inline fun ControllerWrapper.respondEmpty(
     servletRequest: HttpServletRequest,
     servletResponse: HttpServletResponse,
@@ -30,6 +46,7 @@ inline fun ControllerWrapper.respondEmpty(
     } catch (e: Throwable) {
         val response = Response.Error(acceptedAt, e)
         val encoded = ControllerWrapper.defaultJson.encodeToString(response)
+        servletResponse.status = response.status
         servletResponse.outputStream.write(encoded.toByteArray())
     }
 }
@@ -47,6 +64,7 @@ inline fun <reified T : Any> ControllerWrapper.respondObject(
     } catch (e: Throwable) {
         val response = Response.Error(acceptedAt, e)
         val encoded = ControllerWrapper.defaultJson.encodeToString(response)
+        servletResponse.status = response.status
         servletResponse.outputStream.write(encoded.toByteArray())
     }
 }
@@ -64,6 +82,7 @@ inline fun <reified T> ControllerWrapper.respondArray(
     } catch (e: Throwable) {
         val response = Response.Error(acceptedAt, e)
         val encoded = ControllerWrapper.defaultJson.encodeToString(response)
+        servletResponse.status = response.status
         servletResponse.outputStream.write(encoded.toByteArray())
     }
 }
@@ -76,5 +95,6 @@ inline fun ControllerWrapper.respondError(
     val acceptedAt = Clock.System.now()
     val response = Response.Error(acceptedAt, block())
     val encoded = ControllerWrapper.defaultJson.encodeToString(response)
+    servletResponse.status = response.status
     servletResponse.outputStream.write(encoded.toByteArray())
 }
