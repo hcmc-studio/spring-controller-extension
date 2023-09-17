@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletResponse
 import kotlinx.datetime.Clock
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import studio.hcmc.kotlin.protocol.io.ErrorDataTransferObject
 import studio.hcmc.kotlin.protocol.io.Response
 
 interface ControllerWrapper {
@@ -26,7 +27,8 @@ inline fun ControllerWrapper.block(
         if (!context.isFinished) {
             context.finish()
         }
-    } catch (e: Throwable) {
+    } catch (e: ErrorDataTransferObject) {
+        // 직접 등록했을 비지니스 로직의 오류만 응답으로 전송. 이외의 오류는 계속 throw.
         context.respondError(e)
     }
 }
