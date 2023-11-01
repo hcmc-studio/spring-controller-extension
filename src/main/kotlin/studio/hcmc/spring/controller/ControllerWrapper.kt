@@ -7,12 +7,21 @@ import jakarta.servlet.http.HttpServletResponse
 import kotlinx.datetime.Clock
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import org.springframework.http.HttpStatus
 import studio.hcmc.kotlin.protocol.io.ErrorDataTransferObject
 import studio.hcmc.kotlin.protocol.io.Response
 
 interface ControllerWrapper {
     companion object {
         var defaultJson = Json
+    }
+
+    fun Throwable.httpStatueCode(): Int {
+        if (this is ErrorDataTransferObject) {
+            return httpStatusCode
+        } else {
+            return HttpStatus.INTERNAL_SERVER_ERROR.value()
+        }
     }
 }
 
@@ -48,7 +57,7 @@ inline fun ControllerWrapper.respondEmpty(
     } catch (e: Throwable) {
         val response = Response.Error(acceptedAt, e)
         val encoded = ControllerWrapper.defaultJson.encodeToString(response)
-        servletResponse.status = response.status
+        servletResponse.status = e.httpStatueCode()
         servletResponse.outputStream.write(encoded.toByteArray())
     }
 }
@@ -66,7 +75,7 @@ inline fun <reified T : Any> ControllerWrapper.respondObject(
     } catch (e: Throwable) {
         val response = Response.Error(acceptedAt, e)
         val encoded = ControllerWrapper.defaultJson.encodeToString(response)
-        servletResponse.status = response.status
+        servletResponse.status = e.httpStatueCode()
         servletResponse.outputStream.write(encoded.toByteArray())
     }
 }
@@ -84,7 +93,7 @@ inline fun <reified T> ControllerWrapper.respondArray(
     } catch (e: Throwable) {
         val response = Response.Error(acceptedAt, e)
         val encoded = ControllerWrapper.defaultJson.encodeToString(response)
-        servletResponse.status = response.status
+        servletResponse.status = e.httpStatueCode()
         servletResponse.outputStream.write(encoded.toByteArray())
     }
 }
@@ -95,8 +104,9 @@ inline fun ControllerWrapper.respondError(
     block: () -> Throwable
 ) {
     val acceptedAt = Clock.System.now()
-    val response = Response.Error(acceptedAt, block())
+    val throwable = block()
+    val response = Response.Error(acceptedAt, throwable)
     val encoded = ControllerWrapper.defaultJson.encodeToString(response)
-    servletResponse.status = response.status
+    servletResponse.status = throwable.httpStatueCode()
     servletResponse.outputStream.write(encoded.toByteArray())
 }
