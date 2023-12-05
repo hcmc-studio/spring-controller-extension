@@ -54,6 +54,7 @@ class ControllerContext(
 
     inline fun <reified T> writeToResponse(body: T) {
         response.outputStream.write(encodeToBytes(body))
+        response.contentType = "application/json"
         isFinished = true
     }
 
